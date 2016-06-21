@@ -173,12 +173,12 @@ myGameArea.context.fillStyle='#000';
 myGameArea.context.strokeStyle='rgba(0,255,0,0.5)';;
 myGameArea.context.lineWidth=5;
 myGameArea.context.beginPath();
-myGameArea.context.arc(this.x,this.y,50,start,diff+start,false);
+myGameArea.context.arc(this.x,this.y,40,start,diff+start,false);
 myGameArea.context.stroke();
     }
     
     this.drawLaserStatus = function() {
-            var al = 100;
+            var al = 20;
     var start=0;
     var diff=(al/100)*Math.PI*2;
     var cw=myGameArea.canvas.width/2;
@@ -187,9 +187,24 @@ myGameArea.context.fillStyle='#000';
 myGameArea.context.strokeStyle='rgba(255,0,0,0.5)';
 myGameArea.context.lineWidth=5;
 myGameArea.context.beginPath();
-myGameArea.context.arc(this.x,this.y,45,start,diff+start,false);
+myGameArea.context.arc(this.x,this.y,35,start,diff+start,false);
 myGameArea.context.stroke();
     }
+    
+        this.drawHealthStatus = function() {
+            var al = 85;
+    var start=0;
+    var diff=(al/100)*Math.PI*2;
+    var cw=myGameArea.canvas.width/2;
+var ch=myGameArea.canvas.height/2;
+myGameArea.context.fillStyle='#000';
+myGameArea.context.strokeStyle='rgba(0,0,255,0.5)';
+myGameArea.context.lineWidth=5;
+myGameArea.context.beginPath();
+myGameArea.context.arc(this.x,this.y,30,start,diff+start,false);
+myGameArea.context.stroke();
+    }
+
 
     this.generateBoundingBox = function() {
         this.boundingbox.r = (this.width / 2);
@@ -503,6 +518,7 @@ function drawGame() {
     player1.draw();
     player1.drawShieldStatus();
     player1.drawLaserStatus();
+    player1.drawHealthStatus();
     asto.forEach(function(astro) {
         astro.draw()
     })
