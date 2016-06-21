@@ -24,9 +24,9 @@ var coin1 = new coin({
 });
 var asto = [];
 var playerBullets = [];
-var debug = false;
+var debug = true;
 
-for (var i = 0; i < 30; i++) {
+for (var i = 0; i < 20; i++) {
     var size = getRandomInt(50, 200);
     var astro = new astroids({
         x: getRandomInt(0, myGameArea.canvas.width),
@@ -41,6 +41,7 @@ for (var i = 0; i < 30; i++) {
     })
     asto.push(astro);
 }
+
 var checkShipCoin = new checkCollision(player1, coin1);
 var checkShipAstro = new checkAstroidsCollision(player1, asto);
 var checkLaserAstro1 = new checkLaserAstro();
@@ -89,6 +90,10 @@ function astroids(a) {
     var num = getRandomInt(-2, 2);
     this.boundingbox = [];
 
+    this.setSize = function(width,height) {
+        this.width = width;
+        this.height = height;
+    }
 
     this.outOfBorders = function() {
         if (this.x - this.width > myGameArea.canvas.width) {
@@ -210,13 +215,14 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
 
     this.shoot = function() {
         var bulletPosition = this.midpoint();
-
+        if(playerBullets.length < 3) {
         playerBullets.push(Bullet({
             speed: 50,
             angle: angle,
             x: bulletPosition.x,
             y: bulletPosition.y
         }));
+        }
     };
 
     this.midpoint = function() {
@@ -340,7 +346,19 @@ function checkLaserAstro() {
                     ((laser.boundingbox.y - astro.boundingbox.y) * (laser.boundingbox.y - astro.boundingbox.y))
                 )
                 if (distance < laser.boundingbox.r + astro.boundingbox.r) {
-                    asto.splice(idx, 1);
+                   
+                    
+                    var ast = $.extend(true, {}, astro);
+                    if(astro.width > 40) {
+                    for(var i = 0;i < 2;i++) {
+                    ast.angle = getRandomInt(0,360);
+                    ast.setSize (astro.height /2,astro.width/2);
+                    ast.speed = getRandomInt(1,2);
+                    asto.push(ast);
+                    }
+                    }
+                    
+                    asto.splice(idx,1);
                     playerBullets.splice(idx2, 1);
 
 
@@ -436,38 +454,6 @@ function Bullet(I) {
         }
     };
     return I;
-}
-
-function createExplosion(x, y, color)
-{
-	var minSize = 10;
-	var maxSize = 30;
-	var count = 10;
-	var minSpeed = 60.0;
-	var maxSpeed = 200.0;
-	var minScaleSpeed = 1.0;
-	var maxScaleSpeed = 4.0;
-
-	for (var angle=0; angle<360; angle += Math.round(360/count))
-	{
-		var particle = new Particle();
-
-		particle.x = x;
-		particle.y = y;
-
-		particle.radius = randomFloat(minSize, maxSize);
-
-		particle.color = color;
-
-		particle.scaleSpeed = randomFloat(minScaleSpeed, maxScaleSpeed);
-
-		var speed = randomFloat(minSpeed, maxSpeed);
-
-		particle.velocityX = speed * Math.cos(angle * Math.PI / 180.0);
-		particle.velocityY = speed * Math.sin(angle * Math.PI / 180.0);
-
-		particles.push(particle);
-	}
 }
 
 function updateGame() {
