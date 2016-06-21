@@ -1,19 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script   src="https://code.jquery.com/jquery-3.0.0.min.js"   integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   crossorigin="anonymous"></script>
-    <style>
-        canvas {
-            border:1px solid #d3d3d3;
-            background-color: #f1f1f1;
-        }
-    </style>
-</head>
-<body>
-<canvas id="canvas" width="1000" height="900"></canvas>
-<script>
-    var ONE_FRAME_TIME = 1000 / 60;
+var ONE_FRAME_TIME = 1000 / 60;
 
     var myGameArea = {
         canvas : document.getElementById("canvas"),
@@ -31,8 +16,8 @@
 
 
 
-    var player1 = new player(40,40,"red",40,40,myGameArea.context,"ship.png","shipshiel.png");
-    var coin1 = new coin({image:"coins.png",x:100,y:100,width:40,height:40});
+    var player1 = new player(40,40,"red",40,40,myGameArea.context,"img/ship.png","img/shipshiel.png");
+    var coin1 = new coin({image:"img/coins.png",x:100,y:100,width:40,height:40});
     var asto = [];
     var playerBullets  = [];
     var debug = true;
@@ -42,7 +27,7 @@
         var astro = new astroids({
             x: getRandomInt(0, myGameArea.canvas.width),
             y: getRandomInt(0, myGameArea.canvas.height),
-            image: "astro.png",
+            image: "img/astro.png",
             speed: getRandomInt(1,3),
             angle: getRandomInt(0,360),
             rot: getRandomInt(1,3),
@@ -59,7 +44,7 @@
 
     var keys = [];
 
-    var image   = 'bg.jpg'
+    var image   = 'img/bg.jpg'
 
 
     myGameArea.canvas.style.backgroundRepeat = "no-repeat";
@@ -451,8 +436,3 @@
         player1.draw();
         asto.forEach(function(astro){astro.draw()})
     }
-
-</script>
-</body>
-</html>
-
