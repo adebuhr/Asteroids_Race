@@ -308,10 +308,13 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
 function checkCollision(object1, object2) {
     this.update = function() {
 
-        if (object1.x < object2.x + object2.width && object1.x + object1.width > object2.x &&
-            object1.y < object2.y + object2.height && object1.y + object1.height > object2.y) {
-            coin1.updatePosition(getRandomInt(10, myGameArea.canvas.width - 20), getRandomInt(10, myGameArea.canvas.height - 20));
-        }
+ var distance = Math.sqrt(((object1.boundingbox.x - object2.boundingbox.x) * (object1.boundingbox.x - object2.boundingbox.x)) +
+                ((object1.boundingbox.y - object2.boundingbox.y) * (object1.boundingbox.y - object2.boundingbox.y))
+            )
+
+            if (distance < object1.boundingbox.r + object2.boundingbox.r) {
+                coin1.updatePosition(getRandomInt(30,myGameArea.canvas.width - 30),getRandomInt(30,myGameArea.canvas.height - 30));
+            }
     }
 }
 
@@ -364,14 +367,28 @@ function coin(c) {
     this.width = c.width;
     this.height = c.height;
     this.ctx = myGameArea.context;
-
+    this.boundingbox = [];
+    
     this.updatePosition = function(x, y) {
         this.x = x;
         this.y = y;
     }
+    
+    this.generateBoundingBox = function() {
+        this.boundingbox.r = this.width / 2;
+        this.boundingbox.x = this.x + 20;
+        this.boundingbox.y = this.y + 20;
+    }
 
     this.draw = function() {
+        this.generateBoundingBox();
         this.ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        if(debug) {
+        this.ctx.strokeStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.arc(this.boundingbox.x,this.boundingbox.y,this.boundingbox.r,0,2 * Math.PI);
+        this.ctx.stroke();
+        }
     }
 }
 
@@ -419,6 +436,38 @@ function Bullet(I) {
         }
     };
     return I;
+}
+
+function createExplosion(x, y, color)
+{
+	var minSize = 10;
+	var maxSize = 30;
+	var count = 10;
+	var minSpeed = 60.0;
+	var maxSpeed = 200.0;
+	var minScaleSpeed = 1.0;
+	var maxScaleSpeed = 4.0;
+
+	for (var angle=0; angle<360; angle += Math.round(360/count))
+	{
+		var particle = new Particle();
+
+		particle.x = x;
+		particle.y = y;
+
+		particle.radius = randomFloat(minSize, maxSize);
+
+		particle.color = color;
+
+		particle.scaleSpeed = randomFloat(minScaleSpeed, maxScaleSpeed);
+
+		var speed = randomFloat(minSpeed, maxSpeed);
+
+		particle.velocityX = speed * Math.cos(angle * Math.PI / 180.0);
+		particle.velocityY = speed * Math.sin(angle * Math.PI / 180.0);
+
+		particles.push(particle);
+	}
 }
 
 function updateGame() {
