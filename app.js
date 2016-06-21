@@ -24,7 +24,7 @@ var coin1 = new coin({
 });
 var asto = [];
 var playerBullets = [];
-var debug = true;
+var debug = false;
 
 for (var i = 0; i < 30; i++) {
     var size = getRandomInt(50, 200);
@@ -150,14 +150,17 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
     this.image.src = imageurl;
     this.image2 = new Image();
     this.image2.src = imageurl2;
+    this.image3 = new Image();
+    this.image3.src = "img/shipflame.png"
     var shield = false;
     var shieldpower = 50;
     this.boundingbox = [];
+    var flame = false;
 
     this.generateBoundingBox = function() {
-        this.boundingbox.r = (this.width + 9) / 2;
-        this.boundingbox.x = this.x + 2;
-        this.boundingbox.y = this.y + 2;
+        this.boundingbox.r = (this.width / 2);
+        this.boundingbox.x = this.x;
+        this.boundingbox.y = this.y;
     }
 
 
@@ -210,7 +213,7 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
 
         playerBullets.push(Bullet({
             speed: 50,
-            angle: angle - 5,
+            angle: angle,
             x: bulletPosition.x,
             y: bulletPosition.y
         }));
@@ -227,15 +230,15 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
 
 
     this.move = function() {
-
-
         if (keys[38]) {
             this.incrVelo();
+            flame = true;
 
         } else if (keys[40] && shieldpower > 0) {
             shield = true;
         } else {
             shield = false;
+            flame = false;
         }
 
         if (keys[39]) {
@@ -271,7 +274,6 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
         this.x += verX;
         this.y += verY;
         playerBullets.forEach(function(bullet) {
-            console.log("draw:" + bullet)
             bullet.draw();
         });
 
@@ -280,7 +282,12 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
         this.ctx.translate(this.x, this.y);
         this.ctx.rotate(Math.PI / 180 * angle);
         if (!shield) {
-            this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width, this.image.height);
+            if(flame) {
+              this.ctx.drawImage(this.image3, this.image3.width / -2, this.image3.height / -2, this.image3.width, this.image3.height);   
+            } else {
+              this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width, this.image.height);
+            }
+           
         } else {
             shieldpower -= 0.5;
             this.ctx.drawImage(this.image2, this.image2.width / -2, this.image2.height / -2, this.image2.width, this.image2.height);
@@ -316,7 +323,7 @@ function checkAstroidsCollision(ship, astroids) {
             )
 
             if (distance < ship.boundingbox.r + astro.boundingbox.r) {
-                console.log("HHIIIIT");
+                
             }
         })
     }
@@ -329,9 +336,7 @@ function checkLaserAstro() {
                 var distance = Math.sqrt(((laser.boundingbox.x - astro.boundingbox.x) * (laser.boundingbox.x - astro.boundingbox.x)) +
                     ((laser.boundingbox.y - astro.boundingbox.y) * (laser.boundingbox.y - astro.boundingbox.y))
                 )
-                console.log(distance);
                 if (distance < laser.boundingbox.r + astro.boundingbox.r) {
-                    console.log("hit laser with astro");
                     asto.splice(idx, 1);
                     playerBullets.splice(idx2, 1);
 
@@ -403,7 +408,7 @@ function Bullet(I) {
     };
 
     I.draw = function() {
-        myGameArea.context.fillStyle = "red";
+        myGameArea.context.fillStyle = "#00FF6F";
         myGameArea.context.fillRect(I.x, I.y, I.width, I.height);
 
         if (debug) {
