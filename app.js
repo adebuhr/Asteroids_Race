@@ -134,6 +134,7 @@ function astroids(a) {
         this.ctx.drawImage(this.image, this.width / -2, this.height / -2, this.width, this.height);
         this.ctx.restore();
         if (debug) {
+             myGameArea.context.lineWidth=2;
             this.ctx.strokeStyle = "white";
             this.ctx.beginPath();
             this.ctx.arc(this.boundingbox.x, this.boundingbox.y, this.boundingbox.r, 0, 2 * Math.PI);
@@ -161,6 +162,34 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
     var shieldpower = 50;
     this.boundingbox = [];
     var flame = false;
+    
+    this.drawShieldStatus = function() {
+            var al = 50;
+    var start=0;
+    var diff=(al/100)*Math.PI*2;
+    var cw=myGameArea.canvas.width/2;
+var ch=myGameArea.canvas.height/2;
+myGameArea.context.fillStyle='#000';
+myGameArea.context.strokeStyle='rgba(0,255,0,0.5)';;
+myGameArea.context.lineWidth=5;
+myGameArea.context.beginPath();
+myGameArea.context.arc(this.x,this.y,50,start,diff+start,false);
+myGameArea.context.stroke();
+    }
+    
+    this.drawLaserStatus = function() {
+            var al = 100;
+    var start=0;
+    var diff=(al/100)*Math.PI*2;
+    var cw=myGameArea.canvas.width/2;
+var ch=myGameArea.canvas.height/2;
+myGameArea.context.fillStyle='#000';
+myGameArea.context.strokeStyle='rgba(255,0,0,0.5)';
+myGameArea.context.lineWidth=5;
+myGameArea.context.beginPath();
+myGameArea.context.arc(this.x,this.y,45,start,diff+start,false);
+myGameArea.context.stroke();
+    }
 
     this.generateBoundingBox = function() {
         this.boundingbox.r = (this.width / 2);
@@ -303,6 +332,7 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
 
 
         if (debug) {
+            myGameArea.context.lineWidth=2;
             this.ctx.strokeStyle = "white";
             this.ctx.beginPath();
             this.ctx.arc(this.boundingbox.x, this.boundingbox.y, this.boundingbox.r, 0, 2 * Math.PI);
@@ -471,7 +501,11 @@ function drawGame() {
     myGameArea.clear();
     coin1.draw();
     player1.draw();
+    player1.drawShieldStatus();
+    player1.drawLaserStatus();
     asto.forEach(function(astro) {
         astro.draw()
     })
+    
+
 }
