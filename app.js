@@ -30,6 +30,7 @@ var playerBullets = [];
 var debug = false;
 var hit = false;
 var shieldactive = false;
+var collectedCoins = 0;
 
 for (var i = 0; i < 30; i++) {
     var size = getRandomInt(50, 200);
@@ -393,6 +394,7 @@ function checkCollision(object1, object2) {
             )
 
             if (distance < object1.boundingbox.r + object2.boundingbox.r) {
+                collectedCoins++;
                 coin1.updatePosition(getRandomInt(30,myGameArea.canvas.width - 30),getRandomInt(30,myGameArea.canvas.height - 30));
             }
     }
@@ -426,13 +428,10 @@ function checkLaserAstro() {
                     
                     if(hit == false) {
                         hit = true;
-                    if(astro.width > 20) {
+                    if(astro.width > 40) {
                     for(var i = 0;i < 2;i++) {
                     var ast = $.extend(true, {}, astro);
                     ast.angle = getRandomInt(0,360);
-                    console.log(ast);
-                    console.log("idx:"+idx);
-                    console.log(ast.height /2)
                     ast.height = astro.height /2;
                     ast.width = astro.width /2;
                     ast.speed = getRandomInt(1,2);
@@ -499,15 +498,14 @@ function Bullet(I) {
 
     I.xVelocity = 0;
     I.yVelocity = 10;
-    I.width = 3;
-    I.height = 3;
+    I.r = 2;
     I.color = "#000";
     this.angle = I.angle;
 
     I.boundingbox = [];
 
     I.generateBoundingBox = function() {
-        I.boundingbox.r = (this.width) / 2;
+        I.boundingbox.r = I.r;
         I.boundingbox.x = this.x;
         I.boundingbox.y = this.y;
     }
@@ -527,8 +525,14 @@ function Bullet(I) {
     };
 
     I.draw = function() {
-        myGameArea.context.fillStyle = "#00FF6F";
-        myGameArea.context.fillRect(I.x, I.y, I.width, I.height);
+        myGameArea.context.beginPath();
+        myGameArea.context.strokeStyle = '#22ff6f';
+        myGameArea.context.lineWidth = "5px";
+        myGameArea.context.arc(I.x, I.y, I.r, 0, 2 * Math.PI);
+        myGameArea.context.fillStyle = "red";
+        myGameArea.context.fill();
+        myGameArea.context.stroke();
+      
 
         if (debug) {
             myGameArea.context.strokeStyle = "white";
@@ -595,6 +599,69 @@ function linearScaling(oldMin, oldMax, newMin, newMax, oldValue){
         }
         return newValue;
 }  
+
+
+var	clsStopwatch = function() {
+		// Private vars
+		var	startAt	= 0;	// Time of last start / resume. (0 if not running)
+		var	lapTime	= 0;	// Time on the clock when last stopped in milliseconds
+
+		var	now	= function() {
+				return (new Date()).getTime(); 
+			}; 
+ 
+		// Public methods
+		// Start or resume
+		this.start = function() {
+				startAt	= startAt ? startAt : now();
+			};
+
+		// Stop or pause
+		this.stop = function() {
+				// If running, update elapsed time otherwise keep it
+				lapTime	= startAt ? lapTime + now() - startAt : lapTime;
+				startAt	= 0; // Paused
+			};
+
+		// Reset
+		this.reset = function() {
+				lapTime = startAt = 0;
+			};
+
+		// Duration
+		this.time = function() {
+				return lapTime + (startAt ? now() - startAt : 0); 
+			};
+	};
+    
+    
+    function pad(num, size) {
+	var s = "0000" + num;
+	return s.substr(s.length - size);
+}
+
+function formatTime(time) {
+	var h = m = s = ms = 0;
+	var newTime = '';
+
+	h = Math.floor( time / (60 * 60 * 1000) );
+	time = time % (60 * 60 * 1000);
+	m = Math.floor( time / (60 * 1000) );
+	time = time % (60 * 1000);
+	s = Math.floor( time / 1000 );
+	ms = time % 1000;
+
+	newTime = pad(h, 2) + ':' + pad(m, 2) + ':' + pad(s, 2) + ':' + pad(ms, 3);
+	return newTime;
+}
+
+var x = new clsStopwatch();
+var $time;
+var clocktimer;
+
+
+x.start();
+
   
 function updateGame() {
     player1.update();
@@ -605,6 +672,8 @@ function updateGame() {
     checkShipAstro.update();
     checkLaserAstro1.update(playerBullets, asto);
     explosion.update();
+
+
 
 }
 
@@ -618,6 +687,13 @@ function drawGame() {
     asto.forEach(function(astro) {
         astro.draw()
     })
+    
+    myGameArea.context.font = '20pt Calibri';
+    myGameArea.context.fillStyle = 'white';
+    myGameArea.context.fillText("Actual Run", 20, 30);
+    myGameArea.context.fillText(formatTime(x.time()), 20, 53);
+    myGameArea.context.fillText("Collected Coins", 200, 30);
+       myGameArea.context.fillText(collectedCoins + "/25", 200, 53);
     
 
 }
