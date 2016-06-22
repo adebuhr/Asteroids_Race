@@ -25,8 +25,9 @@ var coin1 = new coin({
 var asto = [];
 var playerBullets = [];
 var debug = false;
+var hit = false;
 
-for (var i = 0; i < 1; i++) {
+for (var i = 0; i < 20; i++) {
     var size = getRandomInt(50, 200);
     var astro = new astroids({
         x: getRandomInt(0, myGameArea.canvas.width),
@@ -262,14 +263,14 @@ myGameArea.context.stroke();
 
     this.shoot = function() {
         var bulletPosition = this.midpoint();
-        if(playerBullets.length < 3) {
+   
         playerBullets.push(Bullet({
             speed: 50,
             angle: angle,
             x: bulletPosition.x,
             y: bulletPosition.y
         }));
-        }
+  
     };
 
     this.midpoint = function() {
@@ -303,7 +304,7 @@ myGameArea.context.stroke();
         }
 
         if (keys[32]) {
-            if(playerBullets.length<1)  
+         
             this.shoot();
         }
         }
@@ -411,7 +412,8 @@ function checkLaserAstro() {
                 if (distance < laser.boundingbox.r + astro.boundingbox.r) {
                    
                     
-                 
+                    if(hit == false) {
+                        hit = true;
                     if(astro.width > 20) {
                     for(var i = 0;i < 2;i++) {
                     var ast = $.extend(true, {}, astro);
@@ -425,11 +427,12 @@ function checkLaserAstro() {
                     asto.push(ast);
                     }
                     }
+                  
                     
                     asto.splice(idx,1);
                     playerBullets.splice(idx2, 1);
-                   
-
+                    }
+                    setTimeout(function(){hit=false},400)       
 
                 }
             })
