@@ -12,12 +12,12 @@ var myGameArea = {
 }
 
 
-myGameArea.canvas.width  = window.innerWidth - 50;
-myGameArea.canvas.height = window.innerHeight - 50;
+var x = new clsStopwatch();
+var $time;
+var clocktimer;
 
 
-
-var player1 = new player(40, 40, "red", 40, 40, myGameArea.context, "img/ship.png", "img/shipshiel.png");
+var player1 = new player(40, 40, "red", 100,100, myGameArea.context, "img/ship.png", "img/shipshiel.png");
 var coin1 = new coin({
     image: "img/coins.png",
     x:getRandomInt(150, myGameArea.canvas.width),
@@ -25,14 +25,19 @@ var coin1 = new coin({
     width: 40,
     height: 40
 });
+var shieldcoin1 = new generateShieldCoin("img/shield.png");
+var lasercoin1 = new generateShieldCoin("img/laser.png");
 var asto = [];
 var playerBullets = [];
 var debug = false;
 var hit = false;
 var shieldactive = false;
 var collectedCoins = 0;
+var shieldpower = 50;
+var laserpower = 10;
+var gamestarted = false;
 
-for (var i = 0; i < 30; i++) {
+for (var i = 0; i < 25; i++) {
     var size = getRandomInt(50, 200);
     var astro = new astroids({
         x: getRandomInt(150, myGameArea.canvas.width),
@@ -51,7 +56,8 @@ for (var i = 0; i < 30; i++) {
 var checkShipCoin = new checkCollision(player1, coin1);
 var checkShipAstro = new checkAstroidsCollision(player1, asto);
 var checkLaserAstro1 = new checkLaserAstro();
-
+var checkShipShield = new checkShipShieldCollision(player1,shieldcoin1);
+var checkShipLaser = new checkShipLaserCollision(player1,lasercoin1);
 
 var keys = [];
 
@@ -64,10 +70,23 @@ myGameArea.canvas.style.backgroundRepeat = "no-repeat";
 myGameArea.canvas.style.backgroundImage = 'url(' + image + ')';
 
 
-startGame();
+OpenMenu();
+
+function init() {
+    gamestarted = true;
+    startGame();
+    x.start();
+}
 
 document.body.addEventListener("keydown", function(e) {
     keys[e.keyCode] = true;
+    if(e.keyCode == 13 && !gamestarted) {
+        init(); 
+    } 
+    if(e.keyCode == 82 && dead) {
+        location.reload(); 
+    }
+    
 });
 document.body.addEventListener("keyup", function(e) {
     keys[e.keyCode] = false;
@@ -75,9 +94,24 @@ document.body.addEventListener("keyup", function(e) {
 
 
 function startGame() {
+  
     window.requestAnimationFrame(function() {
+        if(collectedCoins != 15) {
+        if(!dead) {
         updateGame();
         drawGame();
+        } else {
+            
+                    myGameArea.context.font = '50pt Calibri';
+             myGameArea.context.fillText("GAME OVER! YOU ARE DEAD!", myGameArea.canvas.width / 2 - 400,myGameArea.canvas.height / 2);
+        }
+        } else {
+                x.stop()
+                myGameArea.context.font = '50pt Calibri';
+                var endtime = formatTime(x.time());
+             myGameArea.context.fillText("YOU WON! TIME: " + endtime, myGameArea.canvas.width / 2 - 400,myGameArea.canvas.height / 2);
+             dead = true;
+        }
         window.requestAnimationFrame(function() {
             startGame()
         });
@@ -167,11 +201,11 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
     this.image3 = new Image();
     this.image3.src = "img/shipflame.png"
     var shield = false;
-    var shieldpower = 50;
     this.boundingbox = [];
     var flame = false;
     var ende = false;
     var ShieldPercent = 100;
+    var LaserPercent = 100;
     
     this.drawShieldStatus = function() {
             var al = ShieldPercent;
@@ -190,7 +224,7 @@ myGameArea.context.stroke();
 
     
     this.drawLaserStatus = function() {
-            var al = 50;
+            var al = LaserPercent;
     var start=0;
     var diff=(al/100)*Math.PI*2;
     var cw=myGameArea.canvas.width/2;
@@ -205,21 +239,7 @@ myGameArea.context.stroke();
     
     
     
-        this.drawHealthStatus = function() {
-            var al = 85;
-    var start=0;
-    var diff=(al/100)*Math.PI*2;
-    var cw=myGameArea.canvas.width/2;
-var ch=myGameArea.canvas.height/2;
-myGameArea.context.fillStyle='#000';
-myGameArea.context.strokeStyle='rgba(0,0,255,0.5)';
-myGameArea.context.lineWidth=5;
-myGameArea.context.beginPath();
-myGameArea.context.arc(this.x,this.y,30,start,diff+start,false);
-myGameArea.context.stroke();
-    }
-
-
+       
     this.generateBoundingBox = function() {
         this.boundingbox.r = (this.width / 2);
         this.boundingbox.x = this.x;
@@ -314,8 +334,10 @@ myGameArea.context.stroke();
         }
 
         if (keys[32]) {
-         
+            if(laserpower > 0) {
+            laserpower -= 0.5;
             this.shoot();
+            }
         }
         }
 
@@ -350,7 +372,6 @@ myGameArea.context.stroke();
           if(dead == true) {
             explosion.draw(this.x - this.image.width / 2,this.y - this.image.height / 2);
             ende = true;
-            dead = false;
         }    
         if(!ende) {
         this.x += verX;
@@ -368,11 +389,13 @@ myGameArea.context.stroke();
            
         } else {
             shieldpower -= 0.5;
-            ShieldPercent = linearScaling(0,50,0,100,shieldpower);
-            this.ctx.drawImage(this.image2, this.image2.width / -2, this.image2.height / -2, this.image2.width, this.image2.height);
+               this.ctx.drawImage(this.image2, this.image2.width / -2, this.image2.height / -2, this.image2.width, this.image2.height);
+         
         }
         }
-        this.ctx.restore();
+           ShieldPercent = linearScaling(0,50,0,100,shieldpower);
+           LaserPercent = linearScaling(0,20,0,100,laserpower);
+            this.ctx.restore();
         }
 
 
@@ -392,7 +415,7 @@ function checkCollision(object1, object2) {
  var distance = Math.sqrt(((object1.boundingbox.x - object2.boundingbox.x) * (object1.boundingbox.x - object2.boundingbox.x)) +
                 ((object1.boundingbox.y - object2.boundingbox.y) * (object1.boundingbox.y - object2.boundingbox.y))
             )
-
+             
             if (distance < object1.boundingbox.r + object2.boundingbox.r) {
                 collectedCoins++;
                 coin1.updatePosition(getRandomInt(30,myGameArea.canvas.width - 30),getRandomInt(30,myGameArea.canvas.height - 30));
@@ -413,6 +436,39 @@ function checkAstroidsCollision(ship, astroids) {
                 }
             }
         })
+    };
+}
+
+function checkShipShieldCollision(ship, shield) {
+    this.update = function() {
+            var distance = Math.sqrt(((ship.boundingbox.x - shield.boundingbox.x) * (ship.boundingbox.x - shield.boundingbox.x)) +
+                ((ship.boundingbox.y - shield.boundingbox.y) * (ship.boundingbox.y - shield.boundingbox.y))
+            )
+
+            if (distance < ship.boundingbox.r + shield.boundingbox.r) {
+           
+                    shieldcoin1.updatePosition();
+                    shield.collected = true;
+                    shieldpower  = 50;
+                
+            }
+
+    }
+}
+
+function checkShipLaserCollision(ship, laser) {
+    this.update = function() {
+            var distance = Math.sqrt(((ship.boundingbox.x - laser.boundingbox.x) * (ship.boundingbox.x - laser.boundingbox.x)) +
+                ((ship.boundingbox.y - laser.boundingbox.y) * (ship.boundingbox.y - laser.boundingbox.y))
+            )
+
+            if (distance < ship.boundingbox.r + laser.boundingbox.r) {
+           
+                    lasercoin1.updatePosition();
+                    laserpower  = 10;
+                
+            }
+
     }
 }
 
@@ -585,8 +641,46 @@ function Animation(spritesheet, frameSpeed, startFrame, endFrame) {
   };
 }
 
+function generateShieldCoin(image) {
+    this.image = new Image();
+    this.image.src = image;
+    this.x = getRandomInt(50,myGameArea.canvas.width - 50);
+    this.y = getRandomInt(50,myGameArea.canvas.height - 50);
+    this.width = 50;
+    this.height = 50;
+    this.boundingbox = [];
+    this.refresh = 0;
+    this.updatePosition = function() {
+        
+            this.x = getRandomInt(50,myGameArea.canvas.width - 50);
+            this.y = getRandomInt(50,myGameArea.canvas.height - 50);
+           
+            
+        
+        
+    }
+    
+    this.generateBoundingBox = function() {
+         this.boundingbox.r = this.width / 2;
+          this.boundingbox.x = this.x;
+          this.boundingbox.y = this.y;
+    }
+    
+    this.draw = function() {
+      
+            this.generateBoundingBox();
+        
+            myGameArea.context.drawImage(this.image,this.x,this.y,this.width,this.height);
+        
+        
+    }
+}
+
+
+
+
 spritesheet = new SpriteSheet('img/explosion.png', 95.5, 95.5);
-explosion = new Animation(spritesheet, 2, 0, 20);
+explosion = new Animation(spritesheet, 2,6, 10);
  
 function linearScaling(oldMin, oldMax, newMin, newMax, oldValue){
         var newValue;
@@ -601,7 +695,7 @@ function linearScaling(oldMin, oldMax, newMin, newMax, oldValue){
 }  
 
 
-var	clsStopwatch = function() {
+function clsStopwatch() {
 		// Private vars
 		var	startAt	= 0;	// Time of last start / resume. (0 if not running)
 		var	lapTime	= 0;	// Time on the clock when last stopped in milliseconds
@@ -655,26 +749,23 @@ function formatTime(time) {
 	return newTime;
 }
 
-var x = new clsStopwatch();
-var $time;
-var clocktimer;
 
 
-x.start();
+
 
   
 function updateGame() {
     player1.update();
     checkShipCoin.update();
+    checkShipShield.update();
+    checkShipLaser.update();
     asto.forEach(function(astro) {
         astro.update()
     })
     checkShipAstro.update();
     checkLaserAstro1.update(playerBullets, asto);
     explosion.update();
-
-
-
+  
 }
 
 function drawGame() {
@@ -683,17 +774,33 @@ function drawGame() {
     player1.draw();
     player1.drawShieldStatus();
     player1.drawLaserStatus();
-    player1.drawHealthStatus();
+    if(shieldpower < 10) {
+    shieldcoin1.draw();
+    }
+    if(laserpower <= 0 ) {
+        lasercoin1.draw();
+    }
     asto.forEach(function(astro) {
         astro.draw()
     })
+
     
     myGameArea.context.font = '20pt Calibri';
     myGameArea.context.fillStyle = 'white';
     myGameArea.context.fillText("Actual Run", 20, 30);
     myGameArea.context.fillText(formatTime(x.time()), 20, 53);
     myGameArea.context.fillText("Collected Coins", 200, 30);
-       myGameArea.context.fillText(collectedCoins + "/25", 200, 53);
-    
+       myGameArea.context.fillText(collectedCoins + "/15", 200, 53);
+}
+
+function OpenMenu() {
+    var logo = new Image();
+    logo.src = "img/logo.png"
+        myGameArea.context.font = '20pt Calibri';
+    myGameArea.context.fillStyle = 'white';
+     myGameArea.context.fillText("Controls: Arrow Up -> Speed up  Space -> Shoot  Arrow Down -> Shield", myGameArea.canvas.width / 2 - 370,myGameArea.canvas.height - 150 );
+    myGameArea.context.fillText("Collect 15 Suns so fast as you can", myGameArea.canvas.width / 2 - 140,myGameArea.canvas.height - 200 );
+    myGameArea.context.fillText("Press Enter to Start the Game", myGameArea.canvas.width / 2 - 120,myGameArea.canvas.height - 100 );
+    myGameArea.context.drawImage(logo,myGameArea.canvas.width / 2 -300,100,600,400);
 
 }
