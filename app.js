@@ -12,6 +12,9 @@ var myGameArea = {
 }
 
 
+myGameArea.canvas.width  = window.innerWidth - 50;
+myGameArea.canvas.height = window.innerHeight - 50;
+
 
 
 var player1 = new player(40, 40, "red", 40, 40, myGameArea.context, "img/ship.png", "img/shipshiel.png");
@@ -26,6 +29,7 @@ var asto = [];
 var playerBullets = [];
 var debug = false;
 var hit = false;
+var shieldactive = false;
 
 for (var i = 0; i < 20; i++) {
     var size = getRandomInt(50, 200);
@@ -166,9 +170,10 @@ function player(width, height, color, x, y, ctx, imageurl, imageurl2) {
     this.boundingbox = [];
     var flame = false;
     var ende = false;
+    var ShieldPercent = 100;
     
     this.drawShieldStatus = function() {
-            var al = 50;
+            var al = ShieldPercent;
     var start=0;
     var diff=(al/100)*Math.PI*2;
     var cw=myGameArea.canvas.width/2;
@@ -181,8 +186,10 @@ myGameArea.context.arc(this.x,this.y,40,start,diff+start,false);
 myGameArea.context.stroke();
     }
     
+
+    
     this.drawLaserStatus = function() {
-            var al = 20;
+            var al = 50;
     var start=0;
     var diff=(al/100)*Math.PI*2;
     var cw=myGameArea.canvas.width/2;
@@ -194,6 +201,8 @@ myGameArea.context.beginPath();
 myGameArea.context.arc(this.x,this.y,35,start,diff+start,false);
 myGameArea.context.stroke();
     }
+    
+    
     
         this.drawHealthStatus = function() {
             var al = 85;
@@ -290,9 +299,9 @@ myGameArea.context.stroke();
             flame = true;
 
         } else if (keys[40] && shieldpower > 0) {
-            shield = true;
+            shieldactive = true;
         } else {
-            shield = false;
+            shieldactive = false;
             flame = false;
         }
 
@@ -349,7 +358,7 @@ myGameArea.context.stroke();
         this.ctx.translate(this.x, this.y);
         this.ctx.rotate(Math.PI / 180 * angle);
         if(!ende) {
-        if (!shield) {
+        if (!shieldactive) {
             if(flame) {
               this.ctx.drawImage(this.image3, this.image3.width / -2, this.image3.height / -2, this.image3.width, this.image3.height);   
             } else {
@@ -358,6 +367,7 @@ myGameArea.context.stroke();
            
         } else {
             shieldpower -= 0.5;
+            ShieldPercent = linearScaling(0,50,0,100,shieldpower);
             this.ctx.drawImage(this.image2, this.image2.width / -2, this.image2.height / -2, this.image2.width, this.image2.height);
         }
         }
@@ -396,7 +406,9 @@ function checkAstroidsCollision(ship, astroids) {
             )
 
             if (distance < ship.boundingbox.r + astro.boundingbox.r) {
+                if(!shieldactive) {
                 dead = true;
+                }
             }
         })
     }
@@ -533,41 +545,30 @@ function SpriteSheet(path, frameWidth, frameHeight) {
   this.image = new Image();
   this.frameWidth = frameWidth;
   this.frameHeight = frameHeight;
- 
-  // calculate the number of frames in a row after the image loads
   var self = this;
   this.image.onload = function() {
     self.framesPerRow = Math.floor(self.image.width / self.frameWidth);
   };
- 
   this.image.src = path;
 }
 
 function Animation(spritesheet, frameSpeed, startFrame, endFrame) {
  
-  var animationSequence = [];  // array holding the order of the animation
-  var currentFrame = 0;        // the current frame to draw
-  var counter = 0;             // keep track of frame rate
+  var animationSequence = [];  
+  var currentFrame = 0;        
+  var counter = 0;            
   var ctx = myGameArea.context;
- 
-  // create the sequence of frame numbers for the animation
+
   for (var frameNumber = startFrame; frameNumber <= endFrame; frameNumber++)
     animationSequence.push(frameNumber);
  
-  // Update the animation
   this.update = function() {
- 
-    // update to the next frame if it is time
     if (counter == (frameSpeed - 1))
       currentFrame = (currentFrame + 1) % animationSequence.length;
- 
-    // update the counter
     counter = (counter + 1) % frameSpeed;
   };
  
-  // draw the current frame
   this.draw = function(x, y) {
-    // get the row and col of the frame
     var row = Math.floor(animationSequence[currentFrame] / spritesheet.framesPerRow);
     var col = Math.floor(animationSequence[currentFrame] % spritesheet.framesPerRow);
  
@@ -583,7 +584,17 @@ function Animation(spritesheet, frameSpeed, startFrame, endFrame) {
 spritesheet = new SpriteSheet('img/explosion.png', 95.5, 95.5);
 explosion = new Animation(spritesheet, 2, 0, 20);
  
-  
+function linearScaling(oldMin, oldMax, newMin, newMax, oldValue){
+        var newValue;
+        if(oldMin !== oldMax && newMin !== newMax){
+            newValue = parseFloat((((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin))  + newMin);
+            newValue = newValue.toFixed(2);
+        }
+        else{
+            newValue = error;
+        }
+        return newValue;
+}  
   
 function updateGame() {
     player1.update();
