@@ -24,9 +24,9 @@ var coin1 = new coin({
 });
 var asto = [];
 var playerBullets = [];
-var debug = true;
+var debug = false;
 
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 1; i++) {
     var size = getRandomInt(50, 200);
     var astro = new astroids({
         x: getRandomInt(0, myGameArea.canvas.width),
@@ -303,6 +303,7 @@ myGameArea.context.stroke();
         }
 
         if (keys[32]) {
+            if(playerBullets.length<1)  
             this.shoot();
         }
         }
@@ -410,11 +411,16 @@ function checkLaserAstro() {
                 if (distance < laser.boundingbox.r + astro.boundingbox.r) {
                    
                     
-                    var ast = $.extend(true, {}, astro);
-                    if(astro.width > 40) {
+                 
+                    if(astro.width > 20) {
                     for(var i = 0;i < 2;i++) {
+                    var ast = $.extend(true, {}, astro);
                     ast.angle = getRandomInt(0,360);
-                    ast.setSize (astro.height /2,astro.width/2);
+                    console.log(ast);
+                    console.log("idx:"+idx);
+                    console.log(ast.height /2)
+                    ast.height = astro.height /2;
+                    ast.width = astro.width /2;
                     ast.speed = getRandomInt(1,2);
                     asto.push(ast);
                     }
@@ -422,6 +428,7 @@ function checkLaserAstro() {
                     
                     asto.splice(idx,1);
                     playerBullets.splice(idx2, 1);
+                   
 
 
                 }
