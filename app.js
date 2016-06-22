@@ -20,8 +20,8 @@ myGameArea.canvas.height = window.innerHeight - 50;
 var player1 = new player(40, 40, "red", 40, 40, myGameArea.context, "img/ship.png", "img/shipshiel.png");
 var coin1 = new coin({
     image: "img/coins.png",
-    x: 100,
-    y: 100,
+    x:getRandomInt(150, myGameArea.canvas.width),
+    y:getRandomInt(150, myGameArea.canvas.height),
     width: 40,
     height: 40
 });
@@ -31,11 +31,11 @@ var debug = false;
 var hit = false;
 var shieldactive = false;
 
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 30; i++) {
     var size = getRandomInt(50, 200);
     var astro = new astroids({
-        x: getRandomInt(0, myGameArea.canvas.width),
-        y: getRandomInt(0, myGameArea.canvas.height),
+        x: getRandomInt(150, myGameArea.canvas.width),
+        y: getRandomInt(150, myGameArea.canvas.height),
         image: "img/astro.png",
         speed: getRandomInt(1, 3),
         angle: getRandomInt(0, 360),
