@@ -26,7 +26,7 @@ var asto = [];
 var playerBullets = [];
 var debug = false;
 
-for (var i = 0; i < 1; i++) {
+for (var i = 0; i < 20; i++) {
     var size = getRandomInt(50, 200);
     var astro = new astroids({
         x: getRandomInt(0, myGameArea.canvas.width),
@@ -262,7 +262,7 @@ myGameArea.context.stroke();
 
     this.shoot = function() {
         var bulletPosition = this.midpoint();
-        if(playerBullets.length < 3) {
+        if(playerBullets.length < 10) {
         playerBullets.push(Bullet({
             speed: 50,
             angle: angle,
