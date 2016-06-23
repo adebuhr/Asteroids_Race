@@ -729,7 +729,7 @@ function formatTime(time) {
 
 function openMenu() {
 	logo = new Image();
-	logo.src = "img/coins.png"
+	logo.src = "img/log.png"
 	myGameArea.context.font = '20pt Calibri';
 	myGameArea.context.fillStyle = 'white';
 	myGameArea.context.fillText("Controls: Arrow Up -> Speed up  Space -> Shoot  Shift -> Shield", myGameArea.canvas.width / 2 - 370, myGameArea.canvas.height - 150);
