@@ -24,6 +24,7 @@ var gamestarted = false;
 var astrocount = 15;
 var keys = [];
 var image = 'img/bg.jpg'
+var logo = 'img/log.png'
 
 var dead = false;
 
@@ -85,7 +86,7 @@ var start;
 myGameArea.canvas.style.backgroundRepeat = "no-repeat";
 myGameArea.canvas.style.backgroundImage = 'url(' + image + ')';
 
-openMenu();
+openMenu("img/log.jpg");
 
 function init() {
 	gamestarted = true;
@@ -728,14 +729,14 @@ function formatTime(time) {
  */
 
 function openMenu() {
-	logo = new Image();
-	logo.src = "img/log.png"
+    var logo = new Image();
+    logo.src = image;
 	myGameArea.context.font = '20pt Calibri';
 	myGameArea.context.fillStyle = 'white';
 	myGameArea.context.fillText("Controls: Arrow Up -> Speed up  Space -> Shoot  Shift -> Shield", myGameArea.canvas.width / 2 - 370, myGameArea.canvas.height - 150);
 	myGameArea.context.fillText("Collect 15 Suns so fast as you can", myGameArea.canvas.width / 2 - 140, myGameArea.canvas.height - 200);
 	myGameArea.context.fillText("Press Enter to Start the Game", myGameArea.canvas.width / 2 - 120, myGameArea.canvas.height - 100);
-    myGameArea.context.drawImage(logo, myGameArea.canvas.width / 2 - 200, 200,logo.width,logo.height);
+    myGameArea.context.drawImage(logo, 200, 200,200,200);
 }
 
 
